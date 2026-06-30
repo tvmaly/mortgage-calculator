@@ -1,0 +1,771 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>House Payment Calculator</title>
+  <style>
+    :root {
+      --bg: #f7f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --accent: #2563eb;
+      --accent-dark: #1d4ed8;
+      --good: #047857;
+      --warn: #b45309;
+      --bad: #b91c1c;
+      --shadow: 0 12px 28px rgba(31, 41, 55, 0.08);
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top left, #e0ecff 0, transparent 32rem), var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+    }
+
+    main {
+      width: min(1160px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 32px 0 48px;
+    }
+
+    header {
+      margin-bottom: 22px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(2rem, 5vw, 3.25rem);
+      letter-spacing: -0.05em;
+      line-height: 1;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      max-width: 760px;
+      font-size: 1.05rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+      align-items: start;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.94);
+      border: 1px solid rgba(229, 231, 235, 0.85);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 22px 22px 10px;
+    }
+
+    .card h2 {
+      margin: 0 0 6px;
+      font-size: 1.35rem;
+      letter-spacing: -0.02em;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    form {
+      padding: 12px 22px 22px;
+    }
+
+    .section-title {
+      margin: 18px 0 10px;
+      font-size: 0.85rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 750;
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.88rem;
+      color: #374151;
+      font-weight: 650;
+      margin-bottom: 6px;
+    }
+
+    .control-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    input,
+    select,
+    button {
+      font: inherit;
+    }
+
+    input,
+    select {
+      width: 100%;
+      min-height: 42px;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      padding: 9px 11px;
+      background: #fff;
+      color: var(--text);
+      outline: none;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.16);
+    }
+
+    input[type="number"] {
+      appearance: textfield;
+    }
+
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+      appearance: none;
+      margin: 0;
+    }
+
+    .suffix {
+      min-width: 4.8rem;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 10px 16px;
+      cursor: pointer;
+      font-weight: 750;
+    }
+
+    .primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .primary:hover {
+      background: var(--accent-dark);
+    }
+
+    .secondary {
+      background: #eef2ff;
+      color: #1e40af;
+    }
+
+    .secondary:hover {
+      background: #e0e7ff;
+    }
+
+    .results {
+      padding: 0 22px 22px;
+    }
+
+    .result-box {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+      background: #f9fafb;
+    }
+
+    .big-number {
+      font-size: clamp(2rem, 6vw, 3.1rem);
+      font-weight: 850;
+      letter-spacing: -0.05em;
+      line-height: 1;
+      color: var(--good);
+      margin: 2px 0 6px;
+    }
+
+    .big-label {
+      color: var(--muted);
+      font-size: 0.92rem;
+      margin-bottom: 12px;
+    }
+
+    .breakdown {
+      display: grid;
+      gap: 9px;
+      margin-top: 14px;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      padding-bottom: 9px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .row:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .row span:first-child {
+      color: var(--muted);
+    }
+
+    .row strong {
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .notice {
+      margin-top: 12px;
+      font-size: 0.88rem;
+      color: var(--muted);
+    }
+
+    .error {
+      color: var(--bad);
+      font-weight: 700;
+    }
+
+    .hint {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    footer {
+      color: var(--muted);
+      font-size: 0.86rem;
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    @media (max-width: 860px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 560px) {
+      main {
+        width: min(100% - 20px, 1160px);
+        padding-top: 22px;
+      }
+
+      .field-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .card-header,
+      form,
+      .results {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>House Payment Calculator</h1>
+      <p class="subtitle">
+        Estimate monthly housing cost, or work backward from a target monthly payment to estimate the house price you can afford.
+      </p>
+    </header>
+
+    <div class="grid">
+      <section class="card" aria-labelledby="payment-title">
+        <div class="card-header">
+          <h2 id="payment-title">Calculate monthly payment</h2>
+          <p>Enter the house price and costs to estimate principal, interest, taxes, and HOA.</p>
+        </div>
+
+        <form id="paymentForm">
+          <div class="field-grid">
+            <div>
+              <label for="homePrice">Total house price</label>
+              <input id="homePrice" type="number" inputmode="decimal" min="0" step="1000" value="500000" />
+            </div>
+
+            <div>
+              <label for="downPayment">Down payment</label>
+              <div class="control-row">
+                <input id="downPayment" type="number" inputmode="decimal" min="0" step="1000" value="100000" />
+                <select id="downPaymentType" class="suffix" aria-label="Down payment type">
+                  <option value="amount">$</option>
+                  <option value="percent">%</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label for="interestRate">Interest rate</label>
+              <div class="control-row">
+                <input id="interestRate" type="number" inputmode="decimal" min="0" step="0.001" value="6.5" />
+                <span class="suffix" aria-hidden="true">% APR</span>
+              </div>
+            </div>
+
+            <div>
+              <label for="loanTerm">Loan duration</label>
+              <select id="loanTerm">
+                <option value="15">15 years</option>
+                <option value="30" selected>30 years</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="section-title">Recurring monthly costs</div>
+          <div class="field-grid">
+            <div>
+              <label for="hoaFee">Monthly HOA fee</label>
+              <input id="hoaFee" type="number" inputmode="decimal" min="0" step="25" value="150" />
+            </div>
+
+            <div>
+              <label for="propertyTax">Property tax</label>
+              <div class="control-row">
+                <input id="propertyTax" type="number" inputmode="decimal" min="0" step="0.01" value="1.25" />
+                <select id="propertyTaxType" class="suffix" aria-label="Property tax type">
+                  <option value="percent">% yearly</option>
+                  <option value="annual">$/year</option>
+                  <option value="monthly">$/month</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button type="button" class="primary" id="calcPaymentBtn">Calculate</button>
+            <button type="button" class="secondary" id="resetPaymentBtn">Reset</button>
+          </div>
+        </form>
+
+        <div class="results" aria-live="polite">
+          <div class="result-box">
+            <div class="big-label">Estimated total monthly payment</div>
+            <div class="big-number" id="monthlyTotal">$0</div>
+            <div id="paymentError" class="notice error" hidden></div>
+
+            <div class="breakdown">
+              <div class="row"><span>Principal & interest</span><strong id="monthlyPI">$0</strong></div>
+              <div class="row"><span>Property tax</span><strong id="monthlyTax">$0</strong></div>
+              <div class="row"><span>HOA</span><strong id="monthlyHOA">$0</strong></div>
+              <div class="row"><span>Loan amount</span><strong id="loanAmount">$0</strong></div>
+              <div class="row"><span>Down payment</span><strong id="downPaymentOut">$0</strong></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="afford-title">
+        <div class="card-header">
+          <h2 id="afford-title">Solve for house price</h2>
+          <p>Enter your desired monthly payment and this solves for an estimated total house value.</p>
+        </div>
+
+        <form id="affordForm">
+          <div class="field-grid">
+            <div>
+              <label for="targetMonthly">Target total monthly payment</label>
+              <input id="targetMonthly" type="number" inputmode="decimal" min="0" step="50" value="3500" />
+            </div>
+
+            <div>
+              <label for="affordDownPayment">Down payment</label>
+              <div class="control-row">
+                <input id="affordDownPayment" type="number" inputmode="decimal" min="0" step="1000" value="100000" />
+                <select id="affordDownPaymentType" class="suffix" aria-label="Affordable down payment type">
+                  <option value="amount">$</option>
+                  <option value="percent">%</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label for="affordInterestRate">Interest rate</label>
+              <div class="control-row">
+                <input id="affordInterestRate" type="number" inputmode="decimal" min="0" step="0.001" value="6.5" />
+                <span class="suffix" aria-hidden="true">% APR</span>
+              </div>
+            </div>
+
+            <div>
+              <label for="affordLoanTerm">Loan duration</label>
+              <select id="affordLoanTerm">
+                <option value="15">15 years</option>
+                <option value="30" selected>30 years</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="section-title">Estimated recurring costs</div>
+          <div class="field-grid">
+            <div>
+              <label for="affordHOA">Monthly HOA fee</label>
+              <input id="affordHOA" type="number" inputmode="decimal" min="0" step="25" value="150" />
+            </div>
+
+            <div>
+              <label for="affordPropertyTax">Property tax estimate</label>
+              <div class="control-row">
+                <input id="affordPropertyTax" type="number" inputmode="decimal" min="0" step="0.01" value="1.25" />
+                <select id="affordPropertyTaxType" class="suffix" aria-label="Affordable property tax type">
+                  <option value="percent">% yearly</option>
+                  <option value="annual">$/year</option>
+                  <option value="monthly">$/month</option>
+                </select>
+              </div>
+              <div class="hint">Use % yearly when tax scales with house value.</div>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button type="button" class="primary" id="calcAffordBtn">Solve</button>
+            <button type="button" class="secondary" id="resetAffordBtn">Reset</button>
+            <button type="button" class="secondary" id="copyToPaymentBtn">Copy result to calculator</button>
+          </div>
+        </form>
+
+        <div class="results" aria-live="polite">
+          <div class="result-box">
+            <div class="big-label">Estimated total house value</div>
+            <div class="big-number" id="affordPrice">$0</div>
+            <div id="affordError" class="notice error" hidden></div>
+
+            <div class="breakdown">
+              <div class="row"><span>Target monthly payment</span><strong id="targetOut">$0</strong></div>
+              <div class="row"><span>Principal & interest</span><strong id="affordPI">$0</strong></div>
+              <div class="row"><span>Property tax</span><strong id="affordTaxOut">$0</strong></div>
+              <div class="row"><span>HOA</span><strong id="affordHOAOut">$0</strong></div>
+              <div class="row"><span>Loan amount</span><strong id="affordLoanOut">$0</strong></div>
+              <div class="row"><span>Down payment</span><strong id="affordDownOut">$0</strong></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <footer>
+      This is an estimate for principal, interest, property tax, and HOA only. It does not include insurance, PMI, closing costs, or other fees.
+    </footer>
+  </main>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const STORAGE_KEY = "house-payment-calculator-v1";
+
+      const defaults = {
+        homePrice: 500000,
+        downPayment: 100000,
+        downPaymentType: "amount",
+        interestRate: 6.5,
+        loanTerm: 30,
+        hoaFee: 150,
+        propertyTax: 1.25,
+        propertyTaxType: "percent",
+        targetMonthly: 3500,
+        affordDownPayment: 100000,
+        affordDownPaymentType: "amount",
+        affordInterestRate: 6.5,
+        affordLoanTerm: 30,
+        affordHOA: 150,
+        affordPropertyTax: 1.25,
+        affordPropertyTaxType: "percent"
+      };
+
+      const ids = Object.keys(defaults);
+      const money = new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        maximumFractionDigits: 0
+      });
+
+      const moneyCents = new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+
+      const $ = (id) => document.getElementById(id);
+
+      function asNumber(id) {
+        const value = parseFloat($(id).value);
+        return Number.isFinite(value) ? value : 0;
+      }
+
+      function formatMoney(value, cents = false) {
+        if (!Number.isFinite(value)) return "$0";
+        return (cents ? moneyCents : money).format(value);
+      }
+
+      function monthlyMortgagePayment(loanAmount, annualRatePercent, years) {
+        const principal = Math.max(0, loanAmount);
+        const months = Math.max(1, Math.round(years * 12));
+        const monthlyRate = Math.max(0, annualRatePercent) / 100 / 12;
+
+        if (principal <= 0) return 0;
+        if (monthlyRate === 0) return principal / months;
+
+        const factor = Math.pow(1 + monthlyRate, months);
+        return principal * (monthlyRate * factor) / (factor - 1);
+      }
+
+      function downPaymentAmount(homePrice, downPayment, type) {
+        if (type === "percent") return Math.max(0, homePrice * Math.max(0, downPayment) / 100);
+        return Math.max(0, downPayment);
+      }
+
+      function monthlyPropertyTax(homePrice, propertyTax, type) {
+        const value = Math.max(0, propertyTax);
+        if (type === "percent") return Math.max(0, homePrice) * value / 100 / 12;
+        if (type === "annual") return value / 12;
+        return value;
+      }
+
+      function paymentForPrice(homePrice, options) {
+        const price = Math.max(0, homePrice);
+        const down = downPaymentAmount(price, options.downPayment, options.downPaymentType);
+        const loan = Math.max(0, price - down);
+        const pi = monthlyMortgagePayment(loan, options.interestRate, options.loanTerm);
+        const tax = monthlyPropertyTax(price, options.propertyTax, options.propertyTaxType);
+        const hoa = Math.max(0, options.hoa);
+        const total = pi + tax + hoa;
+
+        return { price, down, loan, pi, tax, hoa, total };
+      }
+
+      function saveState() {
+        const state = {};
+        for (const id of ids) {
+          const element = $(id);
+          state[id] = element.tagName === "SELECT" ? element.value : element.value;
+        }
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      }
+
+      function loadState() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          const state = raw ? JSON.parse(raw) : defaults;
+          for (const id of ids) {
+            if ($(id) && state[id] !== undefined) $(id).value = state[id];
+          }
+        } catch {
+          for (const id of ids) {
+            if ($(id)) $(id).value = defaults[id];
+          }
+        }
+      }
+
+      function resetFields(fieldIds) {
+        for (const id of fieldIds) $(id).value = defaults[id];
+        saveState();
+      }
+
+      function setError(id, message) {
+        const el = $(id);
+        if (!message) {
+          el.hidden = true;
+          el.textContent = "";
+          return;
+        }
+        el.hidden = false;
+        el.textContent = message;
+      }
+
+      function calculatePayment() {
+        const homePrice = asNumber("homePrice");
+        const options = {
+          downPayment: asNumber("downPayment"),
+          downPaymentType: $("downPaymentType").value,
+          interestRate: asNumber("interestRate"),
+          loanTerm: asNumber("loanTerm"),
+          hoa: asNumber("hoaFee"),
+          propertyTax: asNumber("propertyTax"),
+          propertyTaxType: $("propertyTaxType").value
+        };
+
+        const result = paymentForPrice(homePrice, options);
+        const overDown = options.downPaymentType === "amount" && options.downPayment > homePrice;
+
+        setError("paymentError", overDown ? "Down payment is larger than the house price. Loan amount is treated as $0." : "");
+        $("monthlyTotal").textContent = formatMoney(result.total);
+        $("monthlyPI").textContent = formatMoney(result.pi, true);
+        $("monthlyTax").textContent = formatMoney(result.tax, true);
+        $("monthlyHOA").textContent = formatMoney(result.hoa, true);
+        $("loanAmount").textContent = formatMoney(result.loan);
+        $("downPaymentOut").textContent = formatMoney(result.down);
+
+        saveState();
+        return result;
+      }
+
+      function solveAffordablePrice() {
+        const target = Math.max(0, asNumber("targetMonthly"));
+        const options = {
+          downPayment: asNumber("affordDownPayment"),
+          downPaymentType: $("affordDownPaymentType").value,
+          interestRate: asNumber("affordInterestRate"),
+          loanTerm: asNumber("affordLoanTerm"),
+          hoa: asNumber("affordHOA"),
+          propertyTax: asNumber("affordPropertyTax"),
+          propertyTaxType: $("affordPropertyTaxType").value
+        };
+
+        const minPrice = options.downPaymentType === "amount" ? Math.max(0, options.downPayment) : 0;
+        const minResult = paymentForPrice(minPrice, options);
+
+        if (target < minResult.total) {
+          setError(
+            "affordError",
+            `No valid house price found. The minimum estimated monthly cost is ${formatMoney(minResult.total, true)} before taking any loan.`
+          );
+          updateAffordOutputs(minResult, target);
+          saveState();
+          return minResult;
+        }
+
+        let low = minPrice;
+        let high = Math.max(250000, minPrice || 1);
+        let highResult = paymentForPrice(high, options);
+        const maxHigh = 100000000;
+
+        while (highResult.total < target && high < maxHigh) {
+          low = high;
+          high *= 2;
+          highResult = paymentForPrice(high, options);
+        }
+
+        if (high >= maxHigh && highResult.total < target) {
+          setError("affordError", "No upper bound found under $100,000,000. Check the inputs.");
+          updateAffordOutputs(highResult, target);
+          saveState();
+          return highResult;
+        }
+
+        for (let i = 0; i < 100; i++) {
+          const mid = (low + high) / 2;
+          const midResult = paymentForPrice(mid, options);
+          if (midResult.total < target) low = mid;
+          else high = mid;
+        }
+
+        const result = paymentForPrice(high, options);
+        setError("affordError", "");
+        updateAffordOutputs(result, target);
+        saveState();
+        return result;
+      }
+
+      function updateAffordOutputs(result, target) {
+        $("affordPrice").textContent = formatMoney(result.price);
+        $("targetOut").textContent = formatMoney(target, true);
+        $("affordPI").textContent = formatMoney(result.pi, true);
+        $("affordTaxOut").textContent = formatMoney(result.tax, true);
+        $("affordHOAOut").textContent = formatMoney(result.hoa, true);
+        $("affordLoanOut").textContent = formatMoney(result.loan);
+        $("affordDownOut").textContent = formatMoney(result.down);
+      }
+
+      function syncAffordResultToPayment() {
+        const result = solveAffordablePrice();
+        if (!Number.isFinite(result.price) || result.price <= 0) return;
+
+        $("homePrice").value = Math.round(result.price);
+        $("downPayment").value = $("affordDownPayment").value;
+        $("downPaymentType").value = $("affordDownPaymentType").value;
+        $("interestRate").value = $("affordInterestRate").value;
+        $("loanTerm").value = $("affordLoanTerm").value;
+        $("hoaFee").value = $("affordHOA").value;
+        $("propertyTax").value = $("affordPropertyTax").value;
+        $("propertyTaxType").value = $("affordPropertyTaxType").value;
+        calculatePayment();
+      }
+
+      const paymentFieldIds = [
+        "homePrice",
+        "downPayment",
+        "downPaymentType",
+        "interestRate",
+        "loanTerm",
+        "hoaFee",
+        "propertyTax",
+        "propertyTaxType"
+      ];
+
+      const affordFieldIds = [
+        "targetMonthly",
+        "affordDownPayment",
+        "affordDownPaymentType",
+        "affordInterestRate",
+        "affordLoanTerm",
+        "affordHOA",
+        "affordPropertyTax",
+        "affordPropertyTaxType"
+      ];
+
+      $("calcPaymentBtn").addEventListener("click", calculatePayment);
+      $("resetPaymentBtn").addEventListener("click", () => {
+        resetFields(paymentFieldIds);
+        calculatePayment();
+      });
+
+      $("calcAffordBtn").addEventListener("click", solveAffordablePrice);
+      $("resetAffordBtn").addEventListener("click", () => {
+        resetFields(affordFieldIds);
+        solveAffordablePrice();
+      });
+      $("copyToPaymentBtn").addEventListener("click", syncAffordResultToPayment);
+
+      for (const id of paymentFieldIds) {
+        $(id).addEventListener("input", calculatePayment);
+        $(id).addEventListener("change", calculatePayment);
+      }
+
+      for (const id of affordFieldIds) {
+        $(id).addEventListener("input", solveAffordablePrice);
+        $(id).addEventListener("change", solveAffordablePrice);
+      }
+
+      loadState();
+      calculatePayment();
+      solveAffordablePrice();
+    })();
+  </script>
+</body>
+</html>
